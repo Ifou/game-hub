@@ -9,6 +9,7 @@ import { type BreadcrumbItem, type User } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Edit, MoreHorizontal, Plus, Search, Trash2, UserCheck, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import ErrorBoundary from '@/components/error-boundary';
 
 import AppLayout from '@/layouts/app-layout';
 
@@ -38,12 +39,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function UsersIndex({ users, filters }: UsersIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
-    const [role, setRole] = useState(filters.role || '');
+    const [role, setRole] = useState(filters.role || 'all');
 
     useEffect(() => {
         const params = new URLSearchParams();
         if (search) params.set('search', search);
-        if (role) params.set('role', role);
+        if (role && role !== 'all') params.set('role', role);
 
         const url = `/admin/users${params.toString() ? `?${params.toString()}` : ''}`;
 
@@ -103,17 +104,19 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                                     />
                                 </div>
                             </div>
-                            <Select value={role} onValueChange={setRole}>
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Filter by role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="">All roles</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="user">User</SelectItem>
-                                    <SelectItem value="null">No role</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <ErrorBoundary>
+                                <Select value={role} onValueChange={setRole}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Filter by role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All roles</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                        <SelectItem value="user">User</SelectItem>
+                                        <SelectItem value="null">No role</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </ErrorBoundary>
                         </div>
 
                         {/* Users Table */}
