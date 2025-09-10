@@ -69,9 +69,9 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="User Management" />
 
-            <div className="space-y-6">
+            <div className="flex-1 space-y-8 p-6 pt-6">
                 <div className="flex items-center justify-between">
-                    <div>
+                    <div className="space-y-2">
                         <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
                         <p className="text-muted-foreground">Manage user accounts and permissions</p>
                     </div>
@@ -92,7 +92,7 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                     </CardHeader>
                     <CardContent>
                         {/* Filters */}
-                        <div className="mb-4 flex flex-col gap-4 sm:flex-row">
+                        <div className="mb-6 flex flex-col gap-4 sm:flex-row">
                             <div className="flex-1">
                                 <div className="relative">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -140,8 +140,8 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                                                             {user.name.charAt(0).toUpperCase()}
                                                         </span>
                                                     </div>
-                                                    <div>
-                                                        <div className="font-medium">{user.name}</div>
+                                                    <div className="space-y-1">
+                                                        <div className="font-medium leading-none">{user.name}</div>
                                                         <div className="text-sm text-muted-foreground">
                                                             {user.email}
                                                         </div>
@@ -200,7 +200,7 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
 
                         {/* Pagination */}
                         {users?.meta?.last_page > 1 && (
-                            <div className="mt-4 flex items-center justify-between">
+                            <div className="mt-6 flex items-center justify-between border-t pt-6">
                                 <div className="text-sm text-muted-foreground">
                                     Showing {((users.meta.current_page - 1) * users.meta.per_page) + 1} to{' '}
                                     {Math.min(users.meta.current_page * users.meta.per_page, users.meta.total)} of{' '}

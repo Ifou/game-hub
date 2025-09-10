@@ -26,7 +26,7 @@ export default function CreateUser() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create User" />
 
-            <div className="space-y-6">
+            <div className="flex-1 space-y-8 p-6 pt-6">
                 <div className="flex items-center space-x-4">
                     <Button variant="outline" size="sm" asChild>
                         <Link href="/admin/users">
@@ -34,7 +34,7 @@ export default function CreateUser() {
                             Back to Users
                         </Link>
                     </Button>
-                    <div>
+                    <div className="space-y-2">
                         <h1 className="text-3xl font-bold tracking-tight">Create User</h1>
                         <p className="text-muted-foreground">Add a new user to the system</p>
                     </div>

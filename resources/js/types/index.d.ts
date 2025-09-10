@@ -42,3 +42,65 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Game {
+    id: number;
+    title: string;
+    description: string;
+    category: string;
+    tags: string[];
+    version: string;
+    min_players?: number;
+    max_players?: number;
+    file_path: string;
+    thumbnail_path?: string;
+    status: 'draft' | 'published' | 'archived';
+    downloads_count: number;
+    views_count: number;
+    average_rating?: number;
+    is_featured: boolean;
+    user_id: number;
+    user?: User;
+    created_at: string;
+    updated_at: string;
+    [key: string]: unknown;
+}
+
+export interface Update {
+    id: number;
+    title: string;
+    content: string;
+    type: 'update' | 'patch' | 'hotfix' | 'announcement' | 'news';
+    importance: 'low' | 'medium' | 'high' | 'critical';
+    is_pinned: boolean;
+    views_count: number;
+    published_at: string;
+    user_id: number;
+    game_id?: number;
+    user?: User;
+    game?: Game;
+    created_at: string;
+    updated_at: string;
+    [key: string]: unknown;
+}
+
+export interface Discussion {
+    id: number;
+    title: string;
+    content: string;
+    category: string;
+    tags: string[];
+    views_count: number;
+    replies_count: number;
+    is_locked: boolean;
+    is_pinned: boolean;
+    is_featured: boolean;
+    last_activity_at: string;
+    user_id: number;
+    game_id?: number;
+    user?: User;
+    game?: Game;
+    created_at: string;
+    updated_at: string;
+    [key: string]: unknown;
+}

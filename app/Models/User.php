@@ -62,4 +62,36 @@ class User extends Authenticatable
     {
         return $this->role === 'user' || $this->role === null;
     }
+
+    /**
+     * Get the games uploaded by this user.
+     */
+    public function games()
+    {
+        return $this->hasMany(Game::class);
+    }
+
+    /**
+     * Get the updates created by this user.
+     */
+    public function updates()
+    {
+        return $this->hasMany(Update::class);
+    }
+
+    /**
+     * Get the discussions started by this user.
+     */
+    public function discussions()
+    {
+        return $this->hasMany(Discussion::class);
+    }
+
+    /**
+     * Get the discussion replies made by this user.
+     */
+    public function discussionReplies()
+    {
+        return $this->hasMany(DiscussionReply::class);
+    }
 }

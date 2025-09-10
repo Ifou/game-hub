@@ -27,7 +27,7 @@ export default function ShowUser({ user }: ShowUserProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`User: ${user.name}`} />
 
-            <div className="space-y-6">
+            <div className="flex-1 space-y-8 p-6 pt-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                         <Button variant="outline" size="sm" asChild>
@@ -36,7 +36,7 @@ export default function ShowUser({ user }: ShowUserProps) {
                                 Back to Users
                             </Link>
                         </Button>
-                        <div>
+                        <div className="space-y-2">
                             <h1 className="text-3xl font-bold tracking-tight">User Details</h1>
                             <p className="text-muted-foreground">Viewing user information</p>
                         </div>

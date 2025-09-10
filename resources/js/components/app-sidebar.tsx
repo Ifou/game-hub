@@ -4,7 +4,18 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Shield, Users } from 'lucide-react';
+import {
+    BookOpen,
+    FileText,
+    Folder,
+    Gamepad2,
+    LayoutGrid,
+    MessageSquare,
+    Shield,
+    Upload,
+    User,
+    Users
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -12,6 +23,37 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'My Profile',
+        href: '/profile',
+        icon: User,
+    },
+];
+
+const gameNavItems: NavItem[] = [
+    {
+        title: 'My Games',
+        href: '/games',
+        icon: Gamepad2,
+    },
+    {
+        title: 'Upload Game',
+        href: '/games/create',
+        icon: Upload,
+    },
+];
+
+const communityNavItems: NavItem[] = [
+    {
+        title: 'Forum',
+        href: '/forum',
+        icon: MessageSquare,
+    },
+    {
+        title: 'My Updates',
+        href: '/updates',
+        icon: FileText,
     },
 ];
 
@@ -28,18 +70,18 @@ const adminNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+// const footerNavItems: NavItem[] = [
+//     {
+//         title: 'Repository',
+//         href: 'https://github.com/laravel/react-starter-kit',
+//         icon: Folder,
+//     },
+//     {
+//         title: 'Documentation',
+//         href: 'https://laravel.com/docs/starter-kits#react',
+//         icon: BookOpen,
+//     },
+// ];
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
@@ -61,11 +103,13 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <NavMain items={gameNavItems} title="Games" />
+                <NavMain items={communityNavItems} title="Community" />
                 {isAdmin && <NavMain items={adminNavItems} title="Administration" />}
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

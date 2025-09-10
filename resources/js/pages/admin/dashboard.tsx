@@ -27,14 +27,14 @@ export default function AdminDashboard({ stats, recentUsers }: AdminDashboardPro
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Admin Dashboard" />
 
-            <div className="space-y-6">
-                <div>
+            <div className="flex-1 space-y-8 p-6 pt-6">
+                <div className="space-y-2">
                     <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
                     <p className="text-muted-foreground">Manage your application users and settings</p>
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-3">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -76,21 +76,21 @@ export default function AdminDashboard({ stats, recentUsers }: AdminDashboardPro
                         <CardDescription>Latest user registrations</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             {recentUsers.map((user) => (
-                                <div key={user.id} className="flex items-center justify-between">
+                                <div key={user.id} className="flex items-center justify-between py-2">
                                     <div className="flex items-center space-x-4">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
                                             <span className="text-sm font-medium">
                                                 {user.name.charAt(0).toUpperCase()}
                                             </span>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-medium">{user.name}</p>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium leading-none">{user.name}</p>
                                             <p className="text-sm text-muted-foreground">{user.email}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center space-x-2">
+                                    <div className="flex items-center space-x-3">
                                         <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
                                             {user.role || 'user'}
                                         </Badge>
