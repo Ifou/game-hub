@@ -146,7 +146,7 @@ export default function Dashboard({
                                         <CardDescription>Your games with the most downloads</CardDescription>
                                     </div>
                                     <Button variant="ghost" size="sm" asChild>
-                                        <Link href="/games">View All</Link>
+                                        <Link href="/my-games">View All</Link>
                                     </Button>
                                 </div>
                             </CardHeader>
@@ -234,7 +234,7 @@ export default function Dashboard({
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-base">Recent Games</CardTitle>
                                     <Button variant="ghost" size="sm" asChild>
-                                        <Link href="/games">View All</Link>
+                                        <Link href="/my-games">View All</Link>
                                     </Button>
                                 </div>
                             </CardHeader>

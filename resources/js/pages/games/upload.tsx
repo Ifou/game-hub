@@ -28,8 +28,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const gameCategories = [
-    'Action', 'Adventure', 'Arcade', 'Puzzle', 'Racing', 'RPG',
-    'Simulation', 'Strategy', 'Sports', 'Platformer', 'Shooter', 'Other'
+    { value: 'action', label: 'Action' },
+    { value: 'adventure', label: 'Adventure' },
+    { value: 'arcade', label: 'Arcade' },
+    { value: 'puzzle', label: 'Puzzle' },
+    { value: 'racing', label: 'Racing' },
+    { value: 'rpg', label: 'RPG' },
+    { value: 'simulation', label: 'Simulation' },
+    { value: 'strategy', label: 'Strategy' },
+    { value: 'sports', label: 'Sports' },
+    { value: 'platformer', label: 'Platformer' },
+    { value: 'shooter', label: 'Shooter' },
+    { value: 'other', label: 'Other' }
 ];
 
 export default function UploadGame() {
@@ -66,10 +76,12 @@ export default function UploadGame() {
         });
 
         router.post('/games', data, {
-            onSuccess: () => {
-                // Redirect to profile or games list
+            onSuccess: (page) => {
+                // Redirect to the newly created game page or profile
+                router.visit('/profile');
             },
-            onError: () => {
+            onError: (errors) => {
+                console.error('Upload errors:', errors);
                 setIsUploading(false);
             },
         });
@@ -145,7 +157,7 @@ export default function UploadGame() {
                                     >
                                         <option value="">Select a category</option>
                                         {gameCategories.map((category) => (
-                                            <option key={category} value={category}>{category}</option>
+                                            <option key={category.value} value={category.value}>{category.label}</option>
                                         ))}
                                     </select>
                                 </div>

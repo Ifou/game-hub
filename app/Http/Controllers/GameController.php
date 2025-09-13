@@ -14,6 +14,44 @@ use Inertia\Inertia;
 class GameController extends Controller
 {
     use AuthorizesRequests;
+
+    /**
+     * Display the authenticated user's games.
+     */
+    public function myGames(Request $request)
+    {
+        $query = Game::with('user')
+            ->where('user_id', Auth::id())
+            ->latest();
+
+        // Search functionality for user's games
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filter by category for user's games
+        if ($request->category) {
+            $query->byCategory($request->category);
+        }
+
+        $games = $query->paginate(12);
+
+        $categories = [
+            'action', 'adventure', 'arcade', 'puzzle', 'racing', 'rpg',
+            'simulation', 'strategy', 'sports', 'platformer', 'shooter', 'other'
+        ];
+
+        return Inertia::render('games/index', [
+            'games' => $games,
+            'categories' => $categories,
+            'filters' => $request->only(['category', 'search']),
+            'isMyGames' => true,
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -44,14 +82,15 @@ class GameController extends Controller
         $games = $query->paginate(12);
 
         $categories = [
-            'action', 'adventure', 'puzzle', 'strategy', 'rpg',
-            'simulation', 'sports', 'racing', 'platformer', 'other'
+            'action', 'adventure', 'arcade', 'puzzle', 'racing', 'rpg',
+            'simulation', 'strategy', 'sports', 'platformer', 'shooter', 'other'
         ];
 
         return Inertia::render('games/index', [
             'games' => $games,
             'categories' => $categories,
             'filters' => $request->only(['category', 'search', 'featured']),
+            'isMyGames' => false,
         ]);
     }
 
@@ -71,13 +110,13 @@ class GameController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
-            'category' => 'required|string|in:action,adventure,puzzle,strategy,rpg,simulation,sports,racing,platformer,other',
+            'category' => 'required|string|in:action,adventure,arcade,puzzle,racing,rpg,simulation,strategy,sports,platformer,shooter,other',
             'tags' => 'nullable|string',
             'version' => 'nullable|string|max:20',
             'min_players' => 'nullable|integer|min:1|max:100',
             'max_players' => 'nullable|integer|min:1|max:100|gte:min_players',
             'game_file' => 'required|file|mimes:zip,rar,7z|max:102400', // 100MB max
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
         ]);
 
         // Handle file uploads
@@ -103,8 +142,8 @@ class GameController extends Controller
             'category' => $validated['category'],
             'tags' => $tagsArray,
             'version' => $validated['version'] ?? '1.0',
-            'min_players' => $validated['min_players'],
-            'max_players' => $validated['max_players'],
+            'min_players' => $validated['min_players'] ?? null,
+            'max_players' => $validated['max_players'] ?? null,
             'file_path' => $gameFilePath,
             'thumbnail_path' => $thumbnailPath,
             'status' => 'published'
@@ -162,7 +201,7 @@ class GameController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
-            'category' => 'required|string|in:action,adventure,puzzle,strategy,rpg,simulation,sports,racing,platformer,other',
+            'category' => 'required|string|in:action,adventure,arcade,puzzle,racing,rpg,simulation,strategy,sports,platformer,shooter,other',
             'tags' => 'nullable|string',
             'version' => 'nullable|string|max:20',
             'min_players' => 'nullable|integer|min:1|max:100',
@@ -178,7 +217,17 @@ class GameController extends Controller
             $tagsArray = array_filter($tagsArray); // Remove empty values
             $tagsArray = array_slice($tagsArray, 0, 10); // Limit to 10 tags
         }
-        $validated['tags'] = $tagsArray;
+
+        // Prepare update data (exclude file fields that don't match database columns)
+        $updateData = [
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'category' => $validated['category'],
+            'tags' => $tagsArray,
+            'version' => $validated['version'] ?? $game->version,
+            'min_players' => $validated['min_players'] ?? null,
+            'max_players' => $validated['max_players'] ?? null,
+        ];
 
         // Handle file uploads
         if ($request->hasFile('game_file')) {
@@ -186,7 +235,7 @@ class GameController extends Controller
             if ($game->file_path) {
                 Storage::disk('public')->delete($game->file_path);
             }
-            $validated['file_path'] = $request->file('game_file')->store('games', 'public');
+            $updateData['file_path'] = $request->file('game_file')->store('games', 'public');
         }
 
         if ($request->hasFile('thumbnail')) {
@@ -194,10 +243,10 @@ class GameController extends Controller
             if ($game->thumbnail_path) {
                 Storage::disk('public')->delete($game->thumbnail_path);
             }
-            $validated['thumbnail_path'] = $request->file('thumbnail')->store('thumbnails', 'public');
+            $updateData['thumbnail_path'] = $request->file('thumbnail')->store('thumbnails', 'public');
         }
 
-        $game->update($validated);
+        $game->update($updateData);
 
         return redirect()->route('games.show', $game)
             ->with('success', 'Game updated successfully!');
@@ -236,6 +285,10 @@ class GameController extends Controller
         // Increment download count
         $game->increment('downloads_count');
 
-        return response()->download(Storage::disk('public')->path($game->file_path), $game->title . '.zip');
+        // Get the original file extension from the stored file path
+        $originalExtension = pathinfo($game->file_path, PATHINFO_EXTENSION);
+        $downloadFilename = $game->title . '.' . $originalExtension;
+
+        return response()->download(Storage::disk('public')->path($game->file_path), $downloadFilename);
     }
 }

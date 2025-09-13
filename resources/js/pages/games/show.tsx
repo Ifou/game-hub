@@ -74,10 +74,6 @@ export default function ShowGame({ auth, game, relatedGames }: Props) {
         }
     };
 
-    const handleDownload = () => {
-        router.get(`/games/${game.id}/download`);
-    };
-
     const isOwner = auth.user?.id === game.user.id;
 
     return (
@@ -189,13 +185,28 @@ export default function ShowGame({ auth, game, relatedGames }: Props) {
                     <div className="space-y-6">
                         {/* Download Section */}
                         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-                            <button
-                                onClick={handleDownload}
-                                className="w-full bg-gradient-to-r from-orange-500 to-pink-600 text-white font-medium py-3 px-4 rounded-lg hover:from-orange-600 hover:to-pink-700 transition-all flex items-center justify-center gap-2 mb-4"
-                            >
-                                <Download className="h-5 w-5" />
-                                Download Game
-                            </button>
+                            {auth?.user ? (
+                                <a
+                                    href={`/games/${game.id}/download`}
+                                    className="w-full bg-gradient-to-r from-orange-500 to-pink-600 text-white font-medium py-3 px-4 rounded-lg hover:from-orange-600 hover:to-pink-700 transition-all flex items-center justify-center gap-2 mb-4 no-underline"
+                                >
+                                    <Download className="h-5 w-5" />
+                                    Download Game
+                                </a>
+                            ) : (
+                                <div className="space-y-2">
+                                    <Link
+                                        href="/login"
+                                        className="w-full bg-gradient-to-r from-orange-500 to-pink-600 text-white font-medium py-3 px-4 rounded-lg hover:from-orange-600 hover:to-pink-700 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Download className="h-5 w-5" />
+                                        Login to Download
+                                    </Link>
+                                    <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+                                        Free account required to download games
+                                    </p>
+                                </div>
+                            )}
 
                             <div className="text-center text-sm text-slate-600 dark:text-slate-300">
                                 {game.downloads_count} downloads

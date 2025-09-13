@@ -28,31 +28,34 @@ import {
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
+const publicNavItems: NavItem[] = [
     {
         title: 'Browse',
         href: '/browse',
         icon: Search,
     },
     {
+        title: 'Forum',
+        href: '/forum',
+        icon: MessageSquare,
+    },
+];
+
+const authNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    },
+    {
         title: 'My Games',
-        href: '/games',
+        href: '/my-games',
         icon: Gamepad2,
     },
     {
         title: 'Updates',
         href: '/updates',
         icon: FileText,
-    },
-    {
-        title: 'Forum',
-        href: '/forum',
-        icon: MessageSquare,
     },
 ];
 
@@ -110,7 +113,8 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
-    const isAdmin = auth.user.role === 'admin';
+    const isAdmin = auth?.user?.role === 'admin';
+    const isAuthenticated = !!auth?.user;
     return (
         <>
             <div className="border-b border-sidebar-border/80">
@@ -139,7 +143,15 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             {/* Main Navigation */}
                                             <div className="space-y-3">
                                                 <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Main</h4>
-                                                {mainNavItems.map((item) => (
+                                                {/* Public navigation items */}
+                                                {publicNavItems.map((item) => (
+                                                    <Link key={item.title} href={item.href} className="flex items-center space-x-3 font-medium text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                                                        {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                        <span>{item.title}</span>
+                                                    </Link>
+                                                ))}
+                                                {/* Authenticated navigation items */}
+                                                {isAuthenticated && authNavItems.map((item) => (
                                                     <Link key={item.title} href={item.href} className="flex items-center space-x-3 font-medium text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
                                                         {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
                                                         <span>{item.title}</span>
@@ -147,16 +159,18 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 ))}
                                             </div>
 
-                                            {/* Quick Actions */}
-                                            <div className="space-y-3">
-                                                <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Quick Actions</h4>
-                                                {quickActions.map((item) => (
-                                                    <Link key={item.title} href={item.href} className="flex items-center space-x-3 font-medium text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
-                                                        {item.icon && <Icon iconNode={item.icon} className="h-4 w-4" />}
-                                                        <span>{item.title}</span>
-                                                    </Link>
-                                                ))}
-                                            </div>
+                                            {/* Quick Actions - Only for authenticated users */}
+                                            {isAuthenticated && (
+                                                <div className="space-y-3">
+                                                    <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Quick Actions</h4>
+                                                    {quickActions.map((item) => (
+                                                        <Link key={item.title} href={item.href} className="flex items-center space-x-3 font-medium text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                                                            {item.icon && <Icon iconNode={item.icon} className="h-4 w-4" />}
+                                                            <span>{item.title}</span>
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
 
                                             {/* Admin Navigation */}
                                             {isAdmin && (
@@ -173,10 +187,21 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         </div>
 
                                         <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                                            <Link href="/forum" className="flex items-center space-x-3 font-medium text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
-                                                <MessageSquare className="h-4 w-4" />
-                                                <span>Browse Forum</span>
-                                            </Link>
+                                            {isAuthenticated ? (
+                                                <Link href="/forum" className="flex items-center space-x-3 font-medium text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                                                    <MessageSquare className="h-4 w-4" />
+                                                    <span>Browse Forum</span>
+                                                </Link>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    <Link href="/login" className="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                                                        Log in
+                                                    </Link>
+                                                    <Link href="/register" className="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                                                        Sign up
+                                                    </Link>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -192,8 +217,29 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
                         <NavigationMenu className="flex h-full items-stretch">
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
-                                {mainNavItems.map((item, index) => (
-                                    <NavigationMenuItem key={index} className="relative flex h-full items-center">
+                                {/* Public navigation items */}
+                                {publicNavItems.map((item, index) => (
+                                    <NavigationMenuItem key={`public-${index}`} className="relative flex h-full items-center">
+                                        <Link
+                                            href={item.href}
+                                            className={cn(
+                                                navigationMenuTriggerStyle(),
+                                                page.url === item.href && activeItemStyles,
+                                                'h-9 cursor-pointer px-3',
+                                            )}
+                                        >
+                                            {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
+                                            {item.title}
+                                        </Link>
+                                        {page.url === item.href && (
+                                            <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                        )}
+                                    </NavigationMenuItem>
+                                ))}
+
+                                {/* Authenticated navigation items */}
+                                {isAuthenticated && authNavItems.map((item, index) => (
+                                    <NavigationMenuItem key={`auth-${index}`} className="relative flex h-full items-center">
                                         <Link
                                             href={item.href}
                                             className={cn(
@@ -317,21 +363,41 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 </TooltipProvider>
                             </div> */}
                         </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="size-10 rounded-full p-1">
-                                    <Avatar className="size-8 overflow-hidden rounded-full">
-                                        <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
-                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                                            {getInitials(auth.user.name)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
-                                <UserMenuContent user={auth.user} />
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+
+                        {/* User Menu - Only show for authenticated users */}
+                        {isAuthenticated ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="size-10 rounded-full p-1">
+                                        <Avatar className="size-8 overflow-hidden rounded-full">
+                                            <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                                {getInitials(auth.user.name)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56" align="end">
+                                    <UserMenuContent user={auth.user} />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            /* Guest user - Show login/register buttons */
+                            <div className="flex items-center space-x-2">
+                                <Link
+                                    href="/login"
+                                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                                >
+                                    Log in
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+                                >
+                                    Sign up
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

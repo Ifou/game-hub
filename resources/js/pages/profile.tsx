@@ -1,5 +1,5 @@
 import AppSidebarLayout from '@/layouts/app/app-header-layout';
-import { type BreadcrumbItem, type User, type SharedData } from '@/types';
+import { type BreadcrumbItem, type User, type SharedData, type Game, type Discussion } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Calendar,
@@ -19,6 +19,8 @@ interface Props extends SharedData {
     gamesCount: number;
     forumPostsCount: number;
     updatesCount: number;
+    recentGames: Game[];
+    recentDiscussions: Discussion[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -29,7 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Profile() {
-    const { user, gamesCount = 0, forumPostsCount = 0, updatesCount = 0 } = usePage<Props>().props;
+    const { user, gamesCount = 0, forumPostsCount = 0, updatesCount = 0, recentGames = [], recentDiscussions = [] } = usePage<Props>().props;
 
     const stats = [
         { icon: Gamepad2, label: 'Games', value: gamesCount, color: 'text-orange-600' },
@@ -135,22 +137,37 @@ export default function Profile() {
                     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Recent Games</h3>
-                            <Link href="/games" className="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                            <Link href="/my-games" className="text-orange-600 hover:text-orange-700 text-sm font-medium">
                                 View All
                             </Link>
                         </div>
-                        {gamesCount > 0 ? (
+                        {recentGames.length > 0 ? (
                             <div className="space-y-3">
-                                {/* Placeholder for games - replace with actual data */}
-                                <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center">
-                                        <Gamepad2 className="h-5 w-5 text-white" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="font-medium text-slate-900 dark:text-white">Space Explorer</p>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">Updated 2 days ago</p>
-                                    </div>
-                                </div>
+                                {recentGames.map((game) => (
+                                    <Link
+                                        key={game.id}
+                                        href={`/games/${game.id}`}
+                                        className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        {game.thumbnail_path ? (
+                                            <img
+                                                src={`/storage/${game.thumbnail_path}`}
+                                                alt={game.title}
+                                                className="h-10 w-10 rounded-lg object-cover"
+                                            />
+                                        ) : (
+                                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center">
+                                                <Gamepad2 className="h-5 w-5 text-white" />
+                                            </div>
+                                        )}
+                                        <div className="flex-1">
+                                            <p className="font-medium text-slate-900 dark:text-white">{game.title}</p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                                {new Date(game.updated_at).toLocaleDateString()} • {game.downloads_count} downloads
+                                            </p>
+                                        </div>
+                                    </Link>
+                                ))}
                             </div>
                         ) : (
                             <div className="text-center py-8">
@@ -175,16 +192,23 @@ export default function Profile() {
                                 View All
                             </Link>
                         </div>
-                        {forumPostsCount > 0 ? (
+                        {recentDiscussions.length > 0 ? (
                             <div className="space-y-3">
-                                {/* Placeholder for forum posts - replace with actual data */}
-                                <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                                    <MessageSquare className="h-5 w-5 text-blue-600 mt-1" />
-                                    <div className="flex-1">
-                                        <p className="font-medium text-slate-900 dark:text-white">Best Indie Games of 2025</p>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">Started 1 week ago • 12 replies</p>
-                                    </div>
-                                </div>
+                                {recentDiscussions.map((discussion) => (
+                                    <Link
+                                        key={discussion.id}
+                                        href={`/forum/${discussion.id}`}
+                                        className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        <MessageSquare className="h-5 w-5 text-blue-600 mt-1" />
+                                        <div className="flex-1">
+                                            <p className="font-medium text-slate-900 dark:text-white">{discussion.title}</p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                                {new Date(discussion.created_at).toLocaleDateString()} • {discussion.replies_count} replies
+                                            </p>
+                                        </div>
+                                    </Link>
+                                ))}
                             </div>
                         ) : (
                             <div className="text-center py-8">

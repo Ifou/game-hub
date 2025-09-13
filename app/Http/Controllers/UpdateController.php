@@ -102,7 +102,7 @@ class UpdateController extends Controller
             'published_at' => $validated['published_at'] ?? now(),
         ]);
 
-        return redirect()->route('updates.show', $update)
+        return redirect()->route('updates.index')
             ->with('success', 'Update created successfully!');
     }
 

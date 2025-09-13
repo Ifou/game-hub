@@ -33,8 +33,18 @@ interface Props extends SharedData {
 }
 
 const gameCategories = [
-    'Action', 'Adventure', 'Arcade', 'Puzzle', 'Racing', 'RPG',
-    'Simulation', 'Strategy', 'Sports', 'Platformer', 'Shooter', 'Other'
+    { value: 'action', label: 'Action' },
+    { value: 'adventure', label: 'Adventure' },
+    { value: 'arcade', label: 'Arcade' },
+    { value: 'puzzle', label: 'Puzzle' },
+    { value: 'racing', label: 'Racing' },
+    { value: 'rpg', label: 'RPG' },
+    { value: 'simulation', label: 'Simulation' },
+    { value: 'strategy', label: 'Strategy' },
+    { value: 'sports', label: 'Sports' },
+    { value: 'platformer', label: 'Platformer' },
+    { value: 'shooter', label: 'Shooter' },
+    { value: 'other', label: 'Other' }
 ];
 
 export default function EditGame({ game }: Props) {
@@ -56,7 +66,7 @@ export default function EditGame({ game }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'My Games',
-            href: '/games',
+            href: '/my-games',
         },
         {
             title: game.title,
@@ -79,10 +89,11 @@ export default function EditGame({ game }: Props) {
         data.append('tags', formData.tags);
         data.append('version', formData.version);
 
-        if (formData.min_players) {
+        // Only append player counts if they have values and are valid numbers
+        if (formData.min_players && !isNaN(Number(formData.min_players))) {
             data.append('min_players', formData.min_players);
         }
-        if (formData.max_players) {
+        if (formData.max_players && !isNaN(Number(formData.max_players))) {
             data.append('max_players', formData.max_players);
         }
 
@@ -96,16 +107,28 @@ export default function EditGame({ game }: Props) {
             data.append(`screenshots[${index}]`, file);
         });
 
-        // Laravel requires _method for PATCH requests with FormData
-        data.append('_method', 'PATCH');
+        // Laravel requires _method for PUT requests with FormData
+        data.append('_method', 'PUT');
+
+        // Debug: log the form data
+        console.log('Form data being sent:');
+        for (let [key, value] of data.entries()) {
+            console.log(key, value);
+        }
 
         router.post(`/games/${game.id}`, data, {
             onSuccess: () => {
+                console.log('Game updated successfully!');
                 // Will redirect to the game show page
             },
-            onError: () => {
+            onError: (errors) => {
+                console.error('Update errors:', errors);
+                console.error('Validation failed with errors:', errors);
                 setIsUpdating(false);
             },
+            onFinish: () => {
+                setIsUpdating(false);
+            }
         });
     };
 
@@ -171,8 +194,8 @@ export default function EditGame({ game }: Props) {
                                 >
                                     <option value="">Select a category</option>
                                     {gameCategories.map(category => (
-                                        <option key={category} value={category.toLowerCase()}>
-                                            {category}
+                                        <option key={category.value} value={category.value}>
+                                            {category.label}
                                         </option>
                                     ))}
                                 </select>
@@ -288,7 +311,7 @@ export default function EditGame({ game }: Props) {
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Game File (Leave empty to keep current file)
                                 </label>
-                                <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
+                                <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
                                     <Cloud className="h-12 w-12 text-slate-400 mx-auto mb-4" />
                                     <div className="text-slate-600 dark:text-slate-300 mb-2">
                                         <span className="font-medium">Click to upload</span> or drag and drop
@@ -313,7 +336,7 @@ export default function EditGame({ game }: Props) {
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Thumbnail (Leave empty to keep current thumbnail)
                                 </label>
-                                <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
+                                <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
                                     <ImageIcon className="h-12 w-12 text-slate-400 mx-auto mb-4" />
                                     <div className="text-slate-600 dark:text-slate-300 mb-2">
                                         <span className="font-medium">Click to upload</span> or drag and drop

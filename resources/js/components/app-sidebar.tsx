@@ -33,8 +33,13 @@ const mainNavItems: NavItem[] = [
 
 const gameNavItems: NavItem[] = [
     {
-        title: 'My Games',
+        title: 'Browse Games',
         href: '/games',
+        icon: Gamepad2,
+    },
+    {
+        title: 'My Games',
+        href: '/my-games',
         icon: Gamepad2,
     },
     {

@@ -112,13 +112,15 @@ Route::get('/browse', function (Request $request) {
         'all' => 'All Games',
         'action' => 'Action',
         'adventure' => 'Adventure',
+        'arcade' => 'Arcade',
         'puzzle' => 'Puzzle',
-        'strategy' => 'Strategy',
+        'racing' => 'Racing',
         'rpg' => 'RPG',
         'simulation' => 'Simulation',
+        'strategy' => 'Strategy',
         'sports' => 'Sports',
-        'racing' => 'Racing',
         'platformer' => 'Platformer',
+        'shooter' => 'Shooter',
         'other' => 'Other'
     ];
 
@@ -141,10 +143,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'gamesCount' => $user->games()->count(),
             'forumPostsCount' => $user->discussions()->count() + $user->discussionReplies()->count(),
             'updatesCount' => $user->updates()->count(),
+            'recentGames' => $user->games()->latest()->take(3)->get(),
+            'recentDiscussions' => $user->discussions()->latest()->take(3)->get(),
         ]);
     })->name('profile');
 
     // Game Routes - Protected routes first (create, edit, update, delete)
+    Route::get('/my-games', [GameController::class, 'myGames'])->name('games.my');
     Route::get('/games/create', [GameController::class, 'create'])->name('games.create');
     Route::post('/games', [GameController::class, 'store'])->name('games.store');
     Route::get('/games/{game}/edit', [GameController::class, 'edit'])->name('games.edit');

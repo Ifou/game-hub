@@ -42,7 +42,7 @@ export default function BrowseGames() {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get('/games', {
+        router.get('/browse', {
             ...(filters || {}),
             search: searchTerm || undefined,
             page: undefined
@@ -53,7 +53,7 @@ export default function BrowseGames() {
     };
 
     const handleFilterChange = (key: string, value: any) => {
-        router.get('/games', {
+        router.get('/browse', {
             ...(filters || {}),
             [key]: value === 'all' ? undefined : value,
             page: undefined
@@ -65,7 +65,7 @@ export default function BrowseGames() {
 
     const clearFilters = () => {
         setSearchTerm('');
-        router.get('/games', {}, {
+        router.get('/browse', {}, {
             preserveState: true,
             replace: true
         });
@@ -74,13 +74,15 @@ export default function BrowseGames() {
     const categoryColors = {
         action: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
         adventure: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300',
+        arcade: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300',
         puzzle: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-        strategy: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+        racing: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
         rpg: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
         simulation: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+        strategy: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
         sports: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
-        racing: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
         platformer: 'bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300',
+        shooter: 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300',
         other: 'bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300'
     };
 
@@ -305,10 +307,12 @@ export default function BrowseGames() {
                                         <select
                                             value={filters?.category || 'all'}
                                             onChange={(e) => handleFilterChange('category', e.target.value)}
-                                            className="block w-full rounded-md border-0 py-1.5 text-white backdrop-blur-sm bg-white/10 shadow-sm ring-1 ring-inset ring-white/20 focus:ring-2 focus:ring-inset focus:ring-orange-600"
+                                            className="block w-full rounded-md border-0 py-1.5 text-slate-900 backdrop-blur-sm bg-white/90 shadow-sm ring-1 ring-inset ring-white/20 focus:ring-2 focus:ring-inset focus:ring-orange-600"
                                         >
                                             {categories && Object.entries(categories).map(([key, label]) => (
-                                                <option key={key} value={key}>{label}</option>
+                                                <option key={key} value={key} className="text-slate-900">
+                                                    {label}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
@@ -319,11 +323,11 @@ export default function BrowseGames() {
                                         <select
                                             value={filters?.sort || 'newest'}
                                             onChange={(e) => handleFilterChange('sort', e.target.value)}
-                                            className="block w-full rounded-md border-0 py-1.5 text-white backdrop-blur-sm bg-white/10 shadow-sm ring-1 ring-inset ring-white/20 focus:ring-2 focus:ring-inset focus:ring-orange-600"
+                                            className="block w-full rounded-md border-0 py-1.5 text-slate-900 backdrop-blur-sm bg-white/90 shadow-sm ring-1 ring-inset ring-white/20 focus:ring-2 focus:ring-inset focus:ring-orange-600"
                                         >
-                                            <option value="newest">Newest</option>
-                                            <option value="popular">Most Popular</option>
-                                            <option value="rated">Highest Rated</option>
+                                            <option value="newest" className="text-slate-900">Newest</option>
+                                            <option value="popular" className="text-slate-900">Most Popular</option>
+                                            <option value="rated" className="text-slate-900">Highest Rated</option>
                                         </select>
                                     </div>
 
