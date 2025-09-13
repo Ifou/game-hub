@@ -1,6 +1,6 @@
 import AppSidebarLayout from '@/layouts/app/app-header-layout';
-import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { type BreadcrumbItem, type SharedData, type Game, type Discussion, type Update } from '@/types';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import {
     Calendar,
     Hash,
@@ -12,11 +12,23 @@ import {
     ThumbsUp,
     TrendingUp,
     Users,
-    Zap
+    Zap,
+    Gamepad2,
+    Filter,
+    Clock
 } from 'lucide-react';
+import { useState } from 'react';
 
 interface Props extends SharedData {
-    discussions: any[];
+    discussions: Discussion[];
+    updates: Update[];
+    games: Game[];
+    filters?: {
+        search?: string;
+        category?: string;
+        game_id?: string;
+        type?: 'discussions' | 'updates' | 'all';
+    };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -36,7 +48,40 @@ const categories = [
 ];
 
 export default function ForumIndex() {
-    const { discussions = [] } = usePage<Props>().props;
+    const { discussions = [], updates = [], games = [], filters = {} } = usePage<Props>().props;
+    const [currentView, setCurrentView] = useState<'discussions' | 'updates' | 'all'>(filters.type || 'all');
+    const [selectedGame, setSelectedGame] = useState<string>(filters.game_id || '');
+    const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
+
+    const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const search = formData.get('search') as string;
+
+        router.get('/forum', {
+            search,
+            game_id: selectedGame,
+            type: currentView
+        }, { preserveState: true });
+    };
+
+    const handleGameFilter = (gameId: string) => {
+        setSelectedGame(gameId);
+        router.get('/forum', {
+            search: searchQuery,
+            game_id: gameId,
+            type: currentView
+        }, { preserveState: true });
+    };
+
+    const handleViewChange = (view: 'discussions' | 'updates' | 'all') => {
+        setCurrentView(view);
+        router.get('/forum', {
+            search: searchQuery,
+            game_id: selectedGame,
+            type: view
+        }, { preserveState: true });
+    };
 
     return (
         <AppSidebarLayout breadcrumbs={breadcrumbs}>
@@ -62,103 +107,270 @@ export default function ForumIndex() {
 
                 {/* Search and Filters */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1 relative">
-                            <Search className="h-5 w-5 absolute left-3 top-3 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search discussions..."
-                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-                        <div className="flex gap-2">
-                            <button className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors flex items-center gap-1">
-                                <TrendingUp className="h-4 w-4" />
-                                Trending
+                    <form onSubmit={handleSearch} className="space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex-1 relative">
+                                <Search className="h-5 w-5 absolute left-3 top-3 text-slate-400" />
+                                <input
+                                    name="search"
+                                    type="text"
+                                    placeholder="Search discussions and updates..."
+                                    defaultValue={searchQuery}
+                                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Search
                             </button>
-                            <button className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                                Recent
-                            </button>
                         </div>
-                    </div>
+
+                        {/* Filters */}
+                        <div className="flex flex-wrap gap-4">
+                            {/* View Type Filter */}
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleViewChange('all')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1 ${currentView === 'all'
+                                        ? 'text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400'
+                                        : 'text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                        }`}
+                                >
+                                    <Filter className="h-4 w-4" />
+                                    All
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleViewChange('discussions')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1 ${currentView === 'discussions'
+                                        ? 'text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400'
+                                        : 'text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                        }`}
+                                >
+                                    <MessageSquare className="h-4 w-4" />
+                                    Discussions
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleViewChange('updates')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1 ${currentView === 'updates'
+                                        ? 'text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400'
+                                        : 'text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                        }`}
+                                >
+                                    <Clock className="h-4 w-4" />
+                                    Updates
+                                </button>
+                            </div>
+
+                            {/* Game Filter */}
+                            <select
+                                value={selectedGame}
+                                onChange={(e) => handleGameFilter(e.target.value)}
+                                className="px-4 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">All Games</option>
+                                {games.map((game) => (
+                                    <option key={game.id} value={game.id.toString()}>
+                                        {game.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </form>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                     {/* Main Content */}
                     <div className="lg:col-span-4 space-y-6">
-                        {/* Discussions List */}
+                        {/* Content List */}
                         <div className="space-y-4">
-                            {discussions.length === 0 ? (
-                                <>
-                                    {/* Sample discussions */}
-                                    {[1, 2, 3, 4, 5].map((discussion) => (
-                                        <div key={discussion} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
+                            {/* Discussions */}
+                            {(currentView === 'all' || currentView === 'discussions') && discussions.length > 0 && (
+                                <div className="space-y-4">
+                                    {currentView === 'all' && (
+                                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <MessageSquare className="h-5 w-5" />
+                                            Recent Discussions
+                                        </h2>
+                                    )}
+                                    {discussions.map((discussion) => (
+                                        <div key={`discussion-${discussion.id}`} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
                                             <div className="flex items-start gap-4">
                                                 <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
-                                                    {discussion === 1 ? 'A' : discussion === 2 ? 'S' : discussion === 3 ? 'M' : discussion === 4 ? 'J' : 'L'}
+                                                    {discussion.user?.name?.charAt(0).toUpperCase() || 'U'}
                                                 </div>
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-2">
-                                                        <span className="font-medium text-slate-900 dark:text-white">
-                                                            {discussion === 1 ? 'Alex Smith' : discussion === 2 ? 'Sarah Chen' : discussion === 3 ? 'Mike Johnson' : discussion === 4 ? 'Jane Doe' : 'Lisa Park'}
-                                                        </span>
+                                                        <Link
+                                                            href={`/users/${discussion.user?.id}`}
+                                                            className="font-medium text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                                        >
+                                                            {discussion.user?.name || 'Unknown User'}
+                                                        </Link>
                                                         <span className="text-xs text-slate-500">•</span>
-                                                        <span className="text-xs text-slate-500">{discussion} day{discussion !== 1 ? 's' : ''} ago</span>
-                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                                            {discussion === 1 ? 'General Discussion' : discussion === 2 ? 'Game Development' : discussion === 3 ? 'Game Showcase' : discussion === 4 ? 'Help & Support' : 'Feedback & Reviews'}
+                                                        <span className="text-xs text-slate-500">
+                                                            {new Date(discussion.created_at).toLocaleDateString()}
                                                         </span>
-                                                        {discussion === 1 && (
+                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                                            {discussion.category}
+                                                        </span>
+                                                        {discussion.game && (
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 gap-1">
+                                                                <Gamepad2 className="h-3 w-3" />
+                                                                {discussion.game.title}
+                                                            </span>
+                                                        )}
+                                                        {discussion.is_pinned && (
                                                             <Pin className="h-4 w-4 text-orange-500" />
                                                         )}
                                                     </div>
                                                     <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
-                                                        {discussion === 1 && 'Best Indie Games of 2025 - What are your favorites?'}
-                                                        {discussion === 2 && 'Looking for feedback on my puzzle game prototype'}
-                                                        {discussion === 3 && 'Just released my first 2D platformer!'}
-                                                        {discussion === 4 && 'How do I optimize game performance for mobile?'}
-                                                        {discussion === 5 && 'Review: Space Explorer - A masterpiece of indie gaming'}
+                                                        <Link href={`/forum/${discussion.id}`} className="hover:text-blue-600 dark:hover:text-blue-400">
+                                                            {discussion.title}
+                                                        </Link>
                                                     </h3>
                                                     <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 line-clamp-2">
-                                                        {discussion === 1 && 'What indie games have impressed you the most this year? Looking for recommendations for games with unique mechanics and great storytelling...'}
-                                                        {discussion === 2 && 'I\'ve been working on a puzzle game for the past few months and would love to get some feedback from fellow developers...'}
-                                                        {discussion === 3 && 'After 8 months of development, I\'m excited to share my first 2D platformer with the community! It features...'}
-                                                        {discussion === 4 && 'I\'m developing a mobile game and struggling with performance issues. The game runs fine on desktop but lags on mobile devices...'}
-                                                        {discussion === 5 && 'I just finished playing Space Explorer and I have to say, this is one of the best indie games I\'ve played in years...'}
+                                                        {discussion.content}
                                                     </p>
 
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                                                             <div className="flex items-center gap-1">
                                                                 <ThumbsUp className="h-4 w-4" />
-                                                                <span>{Math.floor(Math.random() * 50) + 5}</span>
+                                                                <span>{String(discussion.upvotes || 0)}</span>
                                                             </div>
                                                             <div className="flex items-center gap-1">
                                                                 <MessageSquare className="h-4 w-4" />
-                                                                <span>{Math.floor(Math.random() * 30) + 2} replies</span>
+                                                                <span>{String(discussion.replies_count || 0)} replies</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                                                             <Calendar className="h-3 w-3" />
-                                                            <span>Last reply {Math.floor(Math.random() * 12) + 1}h ago</span>
+                                                            <span>
+                                                                {discussion.last_activity_at
+                                                                    ? `Last activity ${new Date(discussion.last_activity_at).toLocaleDateString()}`
+                                                                    : `Created ${new Date(discussion.created_at).toLocaleDateString()}`
+                                                                }
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
-                                </>
-                            ) : (
-                                <div className="text-center py-16">
-                                    <MessageSquare className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                                        No discussions found
-                                    </h3>
-                                    <p className="text-slate-600 dark:text-slate-300 mb-6">
-                                        Be the first to start a conversation!
-                                    </p>
                                 </div>
                             )}
+
+                            {/* Updates */}
+                            {(currentView === 'all' || currentView === 'updates') && updates.length > 0 && (
+                                <div className="space-y-4">
+                                    {currentView === 'all' && (
+                                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <Clock className="h-5 w-5" />
+                                            Recent Updates
+                                        </h2>
+                                    )}
+                                    {updates.map((update) => (
+                                        <div key={`update-${update.id}`} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
+                                            <div className="flex items-start gap-4">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                                                    {update.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Link
+                                                            href={`/users/${update.user?.id}`}
+                                                            className="font-medium text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                                        >
+                                                            {update.user?.name || 'Unknown User'}
+                                                        </Link>
+                                                        <span className="text-xs text-slate-500">•</span>
+                                                        <span className="text-xs text-slate-500">
+                                                            {new Date(update.created_at).toLocaleDateString()}
+                                                        </span>
+                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                                                            {update.type || 'Update'}
+                                                        </span>
+                                                        {update.game && (
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 gap-1">
+                                                                <Gamepad2 className="h-3 w-3" />
+                                                                {update.game.title}
+                                                            </span>
+                                                        )}
+                                                        {update.is_pinned && (
+                                                            <Pin className="h-4 w-4 text-orange-500" />
+                                                        )}
+                                                    </div>
+                                                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
+                                                        <Link href={`/updates/${update.id}`} className="hover:text-green-600 dark:hover:text-green-400">
+                                                            {update.title}
+                                                        </Link>
+                                                    </h3>
+                                                    <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 line-clamp-2">
+                                                        {update.content}
+                                                    </p>
+
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                                                            <div className="flex items-center gap-1">
+                                                                <ThumbsUp className="h-4 w-4" />
+                                                                <span>{String(update.likes_count || 0)}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <MessageSquare className="h-4 w-4" />
+                                                                <span>{String(update.comments_count || 0)} comments</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                                            <Calendar className="h-3 w-3" />
+                                                            <span>
+                                                                {update.published_at
+                                                                    ? `Published ${new Date(update.published_at).toLocaleDateString()}`
+                                                                    : `Created ${new Date(update.created_at).toLocaleDateString()}`
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Empty State */}
+                            {((currentView === 'discussions' && discussions.length === 0) ||
+                                (currentView === 'updates' && updates.length === 0) ||
+                                (currentView === 'all' && discussions.length === 0 && updates.length === 0)) && (
+                                    <div className="text-center py-16">
+                                        <MessageSquare className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+                                        <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                                            {currentView === 'discussions' ? 'No discussions found' :
+                                                currentView === 'updates' ? 'No updates found' :
+                                                    'No content found'}
+                                        </h3>
+                                        <p className="text-slate-600 dark:text-slate-300 mb-6">
+                                            {currentView === 'discussions' ? 'Start a new discussion to get the conversation going!' :
+                                                currentView === 'updates' ? 'Check back later for game updates from the community!' :
+                                                    'Try adjusting your filters or search terms.'}
+                                        </p>
+                                        {currentView === 'discussions' && (
+                                            <Link
+                                                href="/forum/create"
+                                                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                Start Discussion
+                                            </Link>
+                                        )}
+                                    </div>
+                                )}
                         </div>
                     </div>
 

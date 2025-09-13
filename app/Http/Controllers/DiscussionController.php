@@ -19,12 +19,18 @@ class DiscussionController extends Controller
     public function index(Request $request)
     {
         $query = Discussion::with(['user', 'game'])
+            ->where('user_id', Auth::id()) // Only show current user's discussions
             ->unlocked()
             ->active();
 
         // Filter by category
         if ($request->category) {
             $query->byCategory($request->category);
+        }
+
+        // Filter by game
+        if ($request->game_id) {
+            $query->where('game_id', $request->game_id);
         }
 
         // Search functionality
@@ -44,7 +50,31 @@ class DiscussionController extends Controller
             $query->pinned();
         }
 
-        $discussions = $query->paginate(15);
+        $discussions = $query->latest()->paginate(15);
+
+        // Get recent updates (for the combined forum view)
+        $updatesQuery = \App\Models\Update::with(['user', 'game'])
+            ->published();
+
+        // Apply same filters to updates
+        if ($request->game_id) {
+            $updatesQuery->where('game_id', $request->game_id);
+        }
+
+        if ($request->search) {
+            $updatesQuery->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('content', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $updates = $updatesQuery->latest()->take(10)->get();
+
+        // Get all games for the filter dropdown
+        $games = \App\Models\Game::published()
+            ->select('id', 'title', 'user_id')
+            ->with('user:id,name')
+            ->get();
 
         $categories = [
             'general', 'help', 'feedback', 'showcase', 'development',
@@ -53,8 +83,10 @@ class DiscussionController extends Controller
 
         return Inertia::render('forum/index', [
             'discussions' => $discussions,
+            'updates' => $updates,
+            'games' => $games,
             'categories' => $categories,
-            'filters' => $request->only(['category', 'search', 'featured', 'pinned']),
+            'filters' => $request->only(['category', 'search', 'featured', 'pinned', 'game_id', 'type']),
         ]);
     }
 

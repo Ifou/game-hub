@@ -4,6 +4,8 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\DiscussionReplyController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -162,6 +164,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/games', [GameController::class, 'index'])->name('games.index');
 Route::get('/games/{game}', [GameController::class, 'show'])->name('games.show');
 
+// Public comment viewing (no auth required)
+Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
+
+// User Profile Routes (public viewing)
+Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+Route::get('/users/{user}/games', [UserController::class, 'games'])->name('users.games');
+Route::get('/users/{user}/discussions', [UserController::class, 'discussions'])->name('users.discussions');
+Route::get('/users/{user}/activity', [UserController::class, 'activity'])->name('users.activity');
+
+// User-specific Forum Routes (public viewing)
+Route::get('/users/{user}/forum', [UserController::class, 'forum'])->name('users.forum');
+Route::get('/users/{user}/forum/{discussion}', [UserController::class, 'forumShow'])->name('users.forum.show');
+
+// User-specific Updates Routes (public viewing)
+Route::get('/users/{user}/updates', [UserController::class, 'updates'])->name('users.updates');
+Route::get('/users/{user}/updates/{update}', [UserController::class, 'updatesShow'])->name('users.updates.show');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Update Routes
     Route::resource('updates', UpdateController::class);
@@ -180,6 +199,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/replies/{reply}', [DiscussionReplyController::class, 'update'])->name('replies.update');
     Route::delete('/replies/{reply}', [DiscussionReplyController::class, 'destroy'])->name('replies.destroy');
     Route::post('/replies/{reply}/vote', [DiscussionReplyController::class, 'vote'])->name('replies.vote');
+
+    // Comment Routes (for unified commenting on discussions and updates) - requires auth
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+    // User-specific Forum Management Routes (requires auth)
+    Route::get('/users/{user}/forum/create', [UserController::class, 'forumCreate'])->name('users.forum.create');
+    Route::post('/users/{user}/forum', [UserController::class, 'forumStore'])->name('users.forum.store');
+    Route::get('/users/{user}/forum/{discussion}/edit', [UserController::class, 'forumEdit'])->name('users.forum.edit');
+    Route::put('/users/{user}/forum/{discussion}', [UserController::class, 'forumUpdate'])->name('users.forum.update');
+    Route::delete('/users/{user}/forum/{discussion}', [UserController::class, 'forumDestroy'])->name('users.forum.destroy');
+
+    // User-specific Updates Management Routes (requires auth)
+    Route::get('/users/{user}/updates/create', [UserController::class, 'updatesCreate'])->name('users.updates.create');
+    Route::post('/users/{user}/updates', [UserController::class, 'updatesStore'])->name('users.updates.store');
+    Route::get('/users/{user}/updates/{update}/edit', [UserController::class, 'updatesEdit'])->name('users.updates.edit');
+    Route::put('/users/{user}/updates/{update}', [UserController::class, 'updatesUpdate'])->name('users.updates.update');
+    Route::delete('/users/{user}/updates/{update}', [UserController::class, 'updatesDestroy'])->name('users.updates.destroy');
 
     // Settings Route
     Route::get('/settings', function () {

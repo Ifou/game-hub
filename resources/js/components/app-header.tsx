@@ -34,19 +34,9 @@ const publicNavItems: NavItem[] = [
         href: '/browse',
         icon: Search,
     },
-    {
-        title: 'Forum',
-        href: '/forum',
-        icon: MessageSquare,
-    },
 ];
 
 const authNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
     {
         title: 'My Games',
         href: '/my-games',
@@ -56,6 +46,11 @@ const authNavItems: NavItem[] = [
         title: 'Updates',
         href: '/updates',
         icon: FileText,
+    },
+    {
+        title: 'Forum',
+        href: '/forum',
+        icon: MessageSquare,
     },
 ];
 
@@ -119,6 +114,14 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
         <>
             <div className="border-b border-sidebar-border/80">
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
+                    {/* Welcome Button - Far Left */}
+                    <Link
+                        href="/"
+                        className="mr-4 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                    >
+                        Welcome
+                    </Link>
+
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
                         <Sheet>
@@ -209,7 +212,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </Sheet>
                     </div>
 
-                    <Link href="/profile" prefetch className="flex items-center space-x-2">
+                    <Link href="/dashboard" prefetch className="flex items-center space-x-2">
                         <AppLogo />
                     </Link>
 
@@ -370,7 +373,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="size-10 rounded-full p-1">
                                         <Avatar className="size-8 overflow-hidden rounded-full">
-                                            <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                                            <AvatarImage
+                                                src={auth.user.profile_picture ? `/storage/${auth.user.profile_picture}` : auth.user.avatar}
+                                                alt={auth.user.name}
+                                            />
                                             <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                                                 {getInitials(auth.user.name)}
                                             </AvatarFallback>

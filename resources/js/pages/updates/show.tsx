@@ -1,11 +1,12 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Calendar, User, Tag, AlertCircle, Pin, Eye, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import AppSidebarLayout from '@/layouts/app/app-header-layout';
-import { Update, Game, User as UserType } from '@/types';
+import CommentSection from '@/components/comment-section';
+import { Update, Game, User as UserType, SharedData } from '@/types';
 import { router } from '@inertiajs/react';
 
-interface Props {
+interface Props extends SharedData {
     update: Update & {
         user: UserType;
         game?: Game;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function ShowUpdate({ update, relatedUpdates }: Props) {
+    const { auth } = usePage<Props>().props;
     const [isDeleting, setIsDeleting] = useState(false);
 
     const formatDate = (dateString: string) => {
@@ -112,7 +114,12 @@ export default function ShowUpdate({ update, relatedUpdates }: Props) {
                                 <div className="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-300">
                                     <div className="flex items-center gap-2">
                                         <User className="w-4 h-4" />
-                                        <span>{update.user.name}</span>
+                                        <Link
+                                            href={`/users/${update.user.id}`}
+                                            className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                        >
+                                            {update.user.name}
+                                        </Link>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Calendar className="w-4 h-4" />
@@ -198,6 +205,15 @@ export default function ShowUpdate({ update, relatedUpdates }: Props) {
                         </div>
                     </div>
                 )}
+
+                {/* Comments Section */}
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 p-6">
+                    <CommentSection
+                        commentableType="App\Models\Update"
+                        commentableId={update.id}
+                        currentUserId={auth?.user?.id}
+                    />
+                </div>
             </div>
         </AppSidebarLayout>
     );

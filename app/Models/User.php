@@ -22,6 +22,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'profile_picture',
+        'background_picture',
+        'birthdate',
     ];
 
     /**
@@ -44,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birthdate' => 'date',
         ];
     }
 
@@ -93,5 +97,13 @@ class User extends Authenticatable
     public function discussionReplies()
     {
         return $this->hasMany(DiscussionReply::class);
+    }
+
+    /**
+     * Get the comments made by this user.
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }

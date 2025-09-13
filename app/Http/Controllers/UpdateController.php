@@ -19,6 +19,7 @@ class UpdateController extends Controller
     public function index(Request $request)
     {
         $query = Update::with(['user', 'game'])
+            ->where('user_id', Auth::id()) // Only show current user's updates
             ->published()
             ->latest();
 

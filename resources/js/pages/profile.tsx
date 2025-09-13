@@ -1,6 +1,7 @@
 import AppSidebarLayout from '@/layouts/app/app-header-layout';
 import { type BreadcrumbItem, type User, type SharedData, type Game, type Discussion } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     Calendar,
     Clock,
@@ -78,18 +79,48 @@ export default function Profile() {
             <div className="max-w-7xl mx-auto p-6 space-y-8">
                 {/* Profile Header */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                    <div className="h-32 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600"></div>
+                    {/* Background Image or Gradient */}
+                    <div className="h-48 relative">
+                        {user.background_picture ? (
+                            <img
+                                src={`/storage/${user.background_picture}`}
+                                alt="Profile background"
+                                className="h-full w-full object-cover object-center"
+                                style={{ imageRendering: 'crisp-edges' }}
+                            />
+                        ) : (
+                            <div className="h-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600"></div>
+                        )}
+                    </div>
                     <div className="p-6 -mt-16">
                         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-                            <div className="h-24 w-24 rounded-full bg-white dark:bg-slate-800 border-4 border-white dark:border-slate-800 flex items-center justify-center text-2xl font-bold text-slate-600 dark:text-slate-300">
-                                {user.name.charAt(0).toUpperCase()}
+                            {/* Profile Picture */}
+                            <div className="relative">
+                                <Avatar className="h-24 w-24 border-4 border-white dark:border-slate-800">
+                                    <AvatarImage
+                                        src={user.profile_picture ? `/storage/${user.profile_picture}` : undefined}
+                                        alt={user.name}
+                                        className="object-cover"
+                                    />
+                                    <AvatarFallback className="text-2xl font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                        {user.name.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
                             </div>
                             <div className="flex-1">
                                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{user.name}</h1>
                                 <p className="text-slate-600 dark:text-slate-300">{user.email}</p>
-                                <div className="flex items-center gap-2 mt-2 text-sm text-slate-500 dark:text-slate-400">
-                                    <Calendar className="h-4 w-4" />
-                                    <span>Joined {new Date(user.created_at).toLocaleDateString()}</span>
+                                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>Joined {new Date(user.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                    {user.birthdate && (
+                                        <div className="flex items-center gap-2">
+                                            <span>•</span>
+                                            <span>Born {new Date(user.birthdate).toLocaleDateString()}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -14,6 +14,7 @@ interface Game {
     total_ratings: number;
     thumbnail_path?: string;
     is_featured: boolean;
+    user_id: number;
     user: {
         name: string;
     };
@@ -261,7 +262,13 @@ export default function BrowseGames() {
                                         </div>
                                         <p className="text-sm text-blue-100 mb-2 line-clamp-2">{game.description}</p>
                                         <div className="flex items-center justify-between text-xs text-blue-200">
-                                            <span>By {game.user.name}</span>
+                                            <span>By <Link
+                                                href={`/users/${game.user_id}`}
+                                                className="hover:text-white transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {game.user.name}
+                                            </Link></span>
                                             <span>{game.downloads_count >= 1000 ? `${Math.round(game.downloads_count / 100) / 10}k` : game.downloads_count} downloads</span>
                                         </div>
                                     </Link>
@@ -409,7 +416,13 @@ export default function BrowseGames() {
                                             </div>
                                             <p className="text-xs text-blue-100 mb-2 line-clamp-2">{game.description}</p>
                                             <div className="flex items-center justify-between text-xs text-blue-200">
-                                                <span>{game.user.name}</span>
+                                                <Link
+                                                    href={`/users/${game.user_id}`}
+                                                    className="hover:text-white transition-colors"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {game.user.name}
+                                                </Link>
                                                 <div className="flex items-center space-x-2">
                                                     {game.total_ratings > 0 && (
                                                         <span className="flex items-center">

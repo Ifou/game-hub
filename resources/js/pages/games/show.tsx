@@ -103,7 +103,12 @@ export default function ShowGame({ auth, game, relatedGames }: Props) {
                                     <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
                                         <div className="flex items-center gap-1">
                                             <User className="h-4 w-4" />
-                                            {game.user.name}
+                                            <Link
+                                                href={`/users/${game.user.id}`}
+                                                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                            >
+                                                {game.user.name}
+                                            </Link>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Calendar className="h-4 w-4" />
@@ -272,7 +277,13 @@ export default function ShowGame({ auth, game, relatedGames }: Props) {
                                                     {relatedGame.title}
                                                 </p>
                                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                    by {relatedGame.user.name}
+                                                    by <Link
+                                                        href={`/users/${relatedGame.user.id}`}
+                                                        className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        {relatedGame.user.name}
+                                                    </Link>
                                                 </p>
                                             </div>
                                         </Link>

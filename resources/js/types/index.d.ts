@@ -37,6 +37,9 @@ export interface User {
     email: string;
     role?: string | null;
     avatar?: string;
+    profile_picture?: string | null;
+    background_picture?: string | null;
+    birthdate?: string | null;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
@@ -74,6 +77,8 @@ export interface Update {
     importance: 'low' | 'medium' | 'high' | 'critical';
     is_pinned: boolean;
     views_count: number;
+    likes_count: number;
+    comments_count: number;
     published_at: string;
     user_id: number;
     game_id?: number;
@@ -92,6 +97,8 @@ export interface Discussion {
     tags: string[];
     views_count: number;
     replies_count: number;
+    upvotes: number;
+    downvotes: number;
     is_locked: boolean;
     is_pinned: boolean;
     is_featured: boolean;
@@ -100,6 +107,25 @@ export interface Discussion {
     game_id?: number;
     user?: User;
     game?: Game;
+    created_at: string;
+    updated_at: string;
+    [key: string]: unknown;
+}
+
+export interface Comment {
+    id: number;
+    content: string;
+    upvotes: number;
+    downvotes: number;
+    is_moderator_comment: boolean;
+    is_highlighted: boolean;
+    edited_at?: string;
+    parent_id?: number;
+    commentable_type: string;
+    commentable_id: number;
+    user_id: number;
+    user?: User;
+    replies?: Comment[];
     created_at: string;
     updated_at: string;
     [key: string]: unknown;

@@ -9,6 +9,7 @@ interface Game {
     downloads_count: number;
     thumbnail_path?: string;
     is_featured: boolean;
+    user_id: number;
     user: {
         name: string;
     };
@@ -111,22 +112,25 @@ export default function Welcome() {
 
                 {/* Navigation */}
                 <nav className="relative z-10 flex items-center justify-between p-6 lg:px-8 border-b border-white/10 backdrop-blur-sm">
-                    <div className="flex items-center space-x-2">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600 flex items-center justify-center">
-                            <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7.5 6.5C7.5 8.981 9.519 11 12 11s4.5-2.019 4.5-4.5S14.481 2 12 2 7.5 4.019 7.5 6.5zM20 21h1v-1c0-3.859-3.141-7-7-7h-4c-3.859 0-7 3.141-7 7v1h1 1 14z" />
-                            </svg>
+                    <div className="flex items-center space-x-6">
+                        <div className="flex items-center space-x-2">
+                            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600 flex items-center justify-center">
+                                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M7.5 6.5C7.5 8.981 9.519 11 12 11s4.5-2.019 4.5-4.5S14.481 2 12 2 7.5 4.019 7.5 6.5zM20 21h1v-1c0-3.859-3.141-7-7-7h-4c-3.859 0-7 3.141-7 7v1h1 1 14z" />
+                                </svg>
+                            </div>
+                            <span className="text-xl font-bold text-white">GameHub</span>
                         </div>
-                        <span className="text-xl font-bold text-white">GameHub</span>
-                    </div>
 
-                    <div className="flex items-center space-x-4">
                         <Link
                             href={route('games.browse')}
                             className="text-sm font-medium text-blue-100 transition-colors hover:text-white"
                         >
                             Browse Games
                         </Link>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
                         {auth.user ? (
                             <>
                                 <Link
@@ -277,7 +281,13 @@ export default function Welcome() {
                                         </div>
                                         <p className="text-sm text-blue-200 mb-2 line-clamp-2">{game.description}</p>
                                         <div className="flex items-center justify-between text-xs text-blue-300">
-                                            <span>By {game.user.name}</span>
+                                            <span>By <Link
+                                                href={`/users/${game.user_id}`}
+                                                className="hover:text-white transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {game.user.name}
+                                            </Link></span>
                                             <span>{game.downloads_count >= 1000 ? `${Math.round(game.downloads_count / 100) / 10}k` : game.downloads_count} downloads</span>
                                         </div>
                                     </Link>
@@ -345,7 +355,13 @@ export default function Welcome() {
                                         </div>
                                         <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{game.description}</p>
                                         <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700">
-                                            <span className="text-sm text-slate-600 dark:text-slate-300">{game.user?.name || 'Anonymous'}</span>
+                                            <Link
+                                                href={`/users/${game.user_id}`}
+                                                className="text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {game.user?.name || 'Anonymous'}
+                                            </Link>
                                             <div className="flex items-center space-x-1 text-sm text-slate-500 dark:text-slate-400">
                                                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />

@@ -1,6 +1,6 @@
-import AppSidebarLayout from '@/layouts/app/app-header-layout';
-import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
+import { type BreadcrumbItem, type SharedData, type Game } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     Hash,
@@ -14,12 +14,14 @@ import {
 } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
-interface Props extends SharedData { }
+interface Props extends SharedData {
+    games?: Game[];
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Profile',
-        href: '/profile',
+        title: 'Forum',
+        href: '/forum',
     },
     {
         title: 'Start Discussion',
@@ -37,10 +39,12 @@ const discussionCategories = [
 ];
 
 export default function CreateDiscussion() {
+    const { games = [] } = usePage<Props>().props;
     const [formData, setFormData] = useState({
         title: '',
         content: '',
         category: '',
+        game_id: '',
         tags: '',
         isPinned: false,
         allowComments: true,
@@ -56,6 +60,7 @@ export default function CreateDiscussion() {
             title: formData.title,
             content: formData.content,
             category: formData.category,
+            game_id: formData.game_id || null,
             tags: formData.tags,
             is_pinned: formData.isPinned,
             allow_comments: formData.allowComments,
@@ -63,7 +68,8 @@ export default function CreateDiscussion() {
 
         router.post('/forum', data, {
             onSuccess: () => {
-                // Redirect to forum or the new discussion
+                // Redirect to forum
+                router.get('/forum');
             },
             onError: () => {
                 setIsCreating(false);
@@ -72,18 +78,18 @@ export default function CreateDiscussion() {
     };
 
     return (
-        <AppSidebarLayout breadcrumbs={breadcrumbs}>
+        <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Start Discussion" />
 
-            <div className="max-w-7xl mx-auto p-6">
+            <div className="w-full px-6 py-6">
                 {/* Header */}
                 <div className="mb-8">
                     <Link
-                        href="/profile"
+                        href="/forum"
                         className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white mb-4"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        Back to Profile
+                        Back to Forum
                     </Link>
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Start a Discussion</h1>
                     <p className="mt-2 text-slate-600 dark:text-slate-300">
@@ -146,6 +152,27 @@ export default function CreateDiscussion() {
                                         </label>
                                     ))}
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                    Related Game (Optional)
+                                </label>
+                                <select
+                                    value={formData.game_id}
+                                    onChange={(e) => setFormData({ ...formData, game_id: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="">Select a game (optional)</option>
+                                    {games.map((game) => (
+                                        <option key={game.id} value={game.id}>
+                                            {game.title}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                                    Link this discussion to one of your published games
+                                </p>
                             </div>
 
                             <div>
@@ -287,6 +314,6 @@ export default function CreateDiscussion() {
                     </div>
                 </form>
             </div>
-        </AppSidebarLayout>
+        </AppHeaderLayout>
     );
 }
